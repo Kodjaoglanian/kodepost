@@ -123,8 +123,8 @@ func run() error {
 		return fmt.Errorf("falha ao carregar páginas: %w", err)
 	}
 
-	// Ordenar posts cronologicamente decrescente
-	sort.Slice(posts, func(i, j int) bool {
+	// Ordenar posts cronologicamente decrescente (estável para mesma data)
+	sort.SliceStable(posts, func(i, j int) bool {
 		return posts[i].Date.After(posts[j].Date)
 	})
 
@@ -222,9 +222,12 @@ func parsePost(path string) (Post, error) {
 
 	post.Date, err = time.Parse("2006-01-02", meta.Date)
 	if err != nil {
-		post.Date, err = time.Parse(time.RFC3339, meta.Date)
+		post.Date, err = time.Parse("2006-01-02 15:04:05", meta.Date)
 		if err != nil {
-			return Post{}, fmt.Errorf("data inválida '%s': %w", meta.Date, err)
+			post.Date, err = time.Parse(time.RFC3339, meta.Date)
+			if err != nil {
+				return Post{}, fmt.Errorf("data inválida '%s': %w", meta.Date, err)
+			}
 		}
 	}
 
@@ -485,8 +488,8 @@ func buildTimelineGroups(posts []Post) []YearGroup {
 		var mg []MonthGroup
 		for _, m := range months {
 			mp := yearMap[y][m]
-			// Garantir ordem decrescente dentro do mês (mais recente primeiro)
-			sort.Slice(mp, func(i, j int) bool {
+			// Garantir ordem decrescente dentro do mês (estável para mesma data)
+			sort.SliceStable(mp, func(i, j int) bool {
 				return mp[i].Date.After(mp[j].Date)
 			})
 			mg = append(mg, MonthGroup{
