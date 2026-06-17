@@ -3,7 +3,7 @@ kodepost
 
 # Site gerado (rebuild a cada deploy)
 public/
-
+posts/
 # Dependências Go (go.sum é commitado, vendor não)
 vendor/
 

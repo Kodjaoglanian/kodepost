@@ -479,10 +479,15 @@ func buildTimelineGroups(posts []Post) []YearGroup {
 		})
 		var mg []MonthGroup
 		for _, m := range months {
+			mp := yearMap[y][m]
+			// Garantir ordem decrescente dentro do mês (mais recente primeiro)
+			sort.Slice(mp, func(i, j int) bool {
+				return mp[i].Date.After(mp[j].Date)
+			})
 			mg = append(mg, MonthGroup{
 				Month:     m,
 				MonthName: monthNamePT(m),
-				Posts:     yearMap[y][m],
+				Posts:     mp,
 			})
 		}
 		groups = append(groups, YearGroup{Year: y, Months: mg})

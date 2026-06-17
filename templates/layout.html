@@ -251,6 +251,7 @@ main {
 
 /* ─── Cards ─── */
 .card {
+  display: block;
   background: var(--surface-container-low);
   border: 1px solid color-mix(in srgb, var(--outline-variant) 20%, transparent);
   border-radius: var(--radius-md);
@@ -525,16 +526,14 @@ main {
       <div class="timeline-month">
         <div class="month-label">{{.MonthName}} {{$year}}</div>
         {{range .Posts}}
-        <article class="card">
-          <a href="/{{.Slug}}/">
-            <h3 class="card-title">{{.Title}}</h3>
-            {{if .Summary}}<p class="card-excerpt">{{.Summary}}</p>{{end}}
-            <div class="card-meta">
-              <span>{{.Date.Format "02 Jan"}}</span>
-              {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
-            </div>
-          </a>
-        </article>
+        <a class="card" href="/{{.Slug}}/">
+          <h3 class="card-title">{{.Title}}</h3>
+          {{if .Summary}}<p class="card-excerpt">{{.Summary}}</p>{{end}}
+          <div class="card-meta">
+            <span>{{.Date.Format "02 Jan"}}</span>
+            {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+          </div>
+        </a>
         {{end}}
       </div>
       {{end}}
