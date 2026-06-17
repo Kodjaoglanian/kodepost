@@ -156,6 +156,11 @@ func run() error {
 		return fmt.Errorf("falha ao gerar tags: %w", err)
 	}
 
+	// Gerar feed RSS
+	if err := generateRSS(posts, "public/rss.xml"); err != nil {
+		return fmt.Errorf("falha ao gerar rss: %w", err)
+	}
+
 	return nil
 }
 
@@ -540,4 +545,40 @@ func copyImages(srcDir, dstDir string) error {
 // extractTagStrings converte []Post tags para []string únicas
 func extractTagStrings(posts []Post) []string {
 	return extractAllTags(posts)
+}
+
+func generateRSS(posts []Post, outPath string) error {
+	items := ""
+	for _, p := range posts {
+		desc := p.Summary
+		if desc == "" {
+			desc = p.Title
+		}
+		items += fmt.Sprintf(
+			"<item>\n<title>%s</title>\n<link>https://kodepost.com/%s/</link>\n<pubDate>%s</pubDate>\n<guid>https://kodepost.com/%s/</guid>\n<description><![CDATA[%s]]></description>\n</item>\n",
+			escapeXML(p.Title), p.Slug, p.Date.Format(time.RFC1123), p.Slug, desc,
+		)
+	}
+
+	rss := `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>KodePost</title>
+<link>https://kodepost.com</link>
+<description>Pensamentos sobre arquitetura de software, evolução de carreira e tecnologia.</description>
+<language>pt-BR</language>
+<lastBuildDate>` + time.Now().Format(time.RFC1123) + `</lastBuildDate>
+` + items + `</channel>
+</rss>`
+
+	return os.WriteFile(outPath, []byte(rss), 0644)
+}
+
+func escapeXML(s string) string {
+	s = strings.ReplaceAll(s, "&", "&amp;")
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+	s = strings.ReplaceAll(s, "\"", "&quot;")
+	s = strings.ReplaceAll(s, "'", "&apos;")
+	return s
 }
