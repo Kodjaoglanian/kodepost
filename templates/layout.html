@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{{if .IsHome}}KodePost{{else}}{{.Title}}{{end}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ─── Structural vars (always same, no theme dependency) ─── */
+:root {
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-xl: 1rem;
+  --font-headline: 'Libre Caslon Text', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --container-max: 1100px;
+  --gutter: 24px;
+  --section-gap: 64px;
+}
+
+/* ─── Light theme ─── */
+:root.light {
+  --bg: #f9f9ff;
+  --surface: #f9f9ff;
+  --surface-container-low: #f1f3fd;
+  --surface-container-high: #e6e8f2;
+  --surface-container-highest: #e0e2ec;
+  --on-surface: #181c23;
+  --on-surface-variant: #464651;
+  --text-muted: #6b6b78;
+  --primary: #5154a2;
+  --lavender-accent: #e8e9ff;
+  --outline-variant: #c7c5d3;
+  --sage-accent: #edf3ee;
+  --on-sage: #344c3e;
+  --secondary: #4c6455;
+}
+
+/* ─── Dark theme (default if no system preference) ─── */
+:root.dark {
+  --bg: #0f1117;
+  --surface: #13151c;
+  --surface-container-low: #181a22;
+  --surface-container-high: #1e202a;
+  --surface-container-highest: #242630;
+  --on-surface: #e8e9ef;
+  --on-surface-variant: #b0b2c0;
+  --text-muted: #8a8d9a;
+  --primary: #a5a7f0;
+  --lavender-accent: #1a1c2e;
+  --outline-variant: #3a3c4a;
+  --sage-accent: #1a2420;
+  --on-sage: #a8c4b0;
+  --secondary: #8aaf9a;
+}
+
+/* ─── Follow system when no preference saved ─── */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) {
+    --bg: #0f1117;
+    --surface: #13151c;
+    --surface-container-low: #181a22;
+    --surface-container-high: #1e202a;
+    --surface-container-highest: #242630;
+    --on-surface: #e8e9ef;
+    --on-surface-variant: #b0b2c0;
+    --text-muted: #8a8d9a;
+    --primary: #a5a7f0;
+    --lavender-accent: #1a1c2e;
+    --outline-variant: #3a3c4a;
+    --sage-accent: #1a2420;
+    --on-sage: #a8c4b0;
+    --secondary: #8aaf9a;
+  }
+}
+@media (prefers-color-scheme: light) {
+  :root:not(.light):not(.dark) {
+    --bg: #f9f9ff;
+    --surface: #f9f9ff;
+    --surface-container-low: #f1f3fd;
+    --surface-container-high: #e6e8f2;
+    --surface-container-highest: #e0e2ec;
+    --on-surface: #181c23;
+    --on-surface-variant: #464651;
+    --text-muted: #6b6b78;
+    --primary: #5154a2;
+    --lavender-accent: #e8e9ff;
+    --outline-variant: #c7c5d3;
+    --sage-accent: #edf3ee;
+    --on-sage: #344c3e;
+    --secondary: #4c6455;
+  }
+}
+
+/* ─── Reset ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--on-surface);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ─── Header ─── */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 40%, transparent);
+}
+.header-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+.brand {
+  font-family: var(--font-headline);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--on-surface);
+  letter-spacing: -0.01em;
+}
+.nav-area {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.nav-desktop {
+  display: none;
+  align-items: center;
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  .nav-desktop { display: flex; }
+}
+.nav-link {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-link:hover { color: var(--on-surface); }
+.nav-link.active { color: var(--on-surface); border-bottom-color: var(--primary); }
+.theme-toggle {
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 50%, transparent);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  padding: 0.375rem;
+  color: var(--text-muted);
+  transition: color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+.theme-toggle:hover { color: var(--on-surface); background: var(--surface-container-low); }
+.theme-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ─── Main wrapper ─── */
+main {
+  flex: 1;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--section-gap) var(--gutter);
+  width: 100%;
+}
+
+/* ─── Hero ─── */
+.hero { margin-bottom: var(--section-gap); }
+.hero h1 {
+  font-family: var(--font-headline);
+  font-size: 2.5rem;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--on-surface);
+  margin-bottom: 1rem;
+}
+.hero-byline {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+}
+.hero p {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--on-surface-variant);
+  max-width: 680px;
+}
+@media (min-width: 900px) { .hero h1 { font-size: 3.25rem; } }
+
+/* ─── Two-column grid ─── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+@media (min-width: 768px) {
+  .content-grid { grid-template-columns: 1fr 320px; }
+}
+
+/* ─── Section heading ─── */
+.section-title {
+  font-family: var(--font-headline);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--on-surface);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 40%, transparent);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ─── Month label ─── */
+.month-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  margin-top: 2rem;
+}
+.month-label:first-child { margin-top: 0; }
+
+/* ─── Cards ─── */
+.card {
+  background: var(--surface-container-low);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 20%, transparent);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 0.75rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.card:hover {
+  background: var(--surface-container-high);
+  border-color: color-mix(in srgb, var(--primary) 20%, transparent);
+}
+.card-title {
+  font-family: var(--font-headline);
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--on-surface);
+  margin-bottom: 0.4rem;
+  transition: color 0.2s;
+}
+.card:hover .card-title { color: var(--primary); }
+.card-excerpt {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--on-surface-variant);
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  background: var(--sage-accent);
+  color: var(--on-sage);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ─── Sidebar ─── */
+.sidebar { display: none; flex-direction: column; gap: 1.5rem; }
+@media (min-width: 768px) { .sidebar { display: flex; position: sticky; top: 80px; } }
+.sidebar-box {
+  background: var(--surface-container-low);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 25%, transparent);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+}
+.sidebar-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+.sidebar-item { padding: 0.6rem 0; border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 15%, transparent); }
+.sidebar-item:last-child { border-bottom: none; padding-bottom: 0; }
+.sidebar-item h4 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--on-surface);
+  margin-bottom: 0.2rem;
+  transition: color 0.2s;
+}
+.sidebar-item a:hover h4 { color: var(--primary); }
+.sidebar-item small { font-size: 0.75rem; color: var(--text-muted); }
+.sidebar-nav-item {
+  display: block;
+  padding: 0.45rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 15%, transparent);
+  transition: color 0.2s;
+  line-height: 1.4;
+}
+.sidebar-nav-item:last-child { border-bottom: none; }
+.sidebar-nav-item:hover, .sidebar-nav-item.active { color: var(--primary); }
+.sidebar-nav-item.active { font-weight: 600; }
+
+/* ─── Tags cloud ─── */
+.tags-cloud { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  background: var(--sage-accent);
+  color: var(--on-sage);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.tag-chip:hover { filter: brightness(0.9); }
+
+/* ─── Page content ─── */
+.page-header, .post-header { margin-bottom: 2.5rem; }
+.page-header h1, .post-header h1 {
+  font-family: var(--font-headline);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--on-surface);
+  margin-bottom: 0.75rem;
+}
+@media (min-width: 768px) {
+  .page-header h1, .post-header h1 { font-size: 2.75rem; }
+}
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+.post-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+
+/* ─── Post body ─── */
+.post-body { font-size: 1.0625rem; line-height: 1.8; color: var(--on-surface); }
+.post-body h2, .post-body h3, .post-body h4 {
+  font-family: var(--font-headline);
+  font-weight: 400;
+  color: var(--on-surface);
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+.post-body h2 { font-size: 1.75rem; }
+.post-body h3 { font-size: 1.4rem; }
+.post-body h4 { font-size: 1.1rem; }
+.post-body p { margin-bottom: 1.5rem; color: var(--on-surface-variant); }
+.post-body a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.post-body ul, .post-body ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+.post-body li { margin-bottom: 0.4rem; color: var(--on-surface-variant); }
+.post-body blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--on-surface-variant);
+}
+.post-body pre {
+  background: var(--surface-container-highest);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--outline-variant);
+}
+.post-body code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--surface-container-high);
+  padding: 0.15em 0.4em;
+  border-radius: var(--radius-sm);
+}
+.post-body pre code { background: transparent; padding: 0; line-height: 1.65; }
+.post-body img { max-width: 100%; height: auto; border-radius: var(--radius-md); margin: 1.5rem 0; display: block; }
+.post-body hr { border: none; border-top: 1px solid var(--outline-variant); margin: 2rem 0; }
+
+/* ─── Tags page ─── */
+.tags-list { display: flex; flex-direction: column; gap: 2rem; }
+.tag-section h2 {
+  font-family: var(--font-headline);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--on-surface);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 40%, transparent);
+}
+.tag-posts a {
+  display: block;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 15%, transparent);
+  transition: color 0.2s;
+}
+.tag-posts a:hover { color: var(--primary); }
+.tag-post-title { font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.15rem; }
+.tag-post-date { font-size: 0.75rem; color: var(--text-muted); }
+
+/* ─── Footer ─── */
+.site-footer {
+  background: var(--surface-container-low);
+  border-top: 1px solid color-mix(in srgb, var(--outline-variant) 30%, transparent);
+}
+.footer-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 1.5rem var(--gutter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+@media (min-width: 640px) {
+  .footer-inner { flex-direction: row; justify-content: space-between; }
+}
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a { color: var(--text-muted); transition: color 0.2s; }
+.footer-links a:hover { color: var(--on-surface); }
+</style>
+<script>
+(function(){
+  var root = document.documentElement;
+  var saved = localStorage.getItem('theme');
+  if (saved === 'light' || saved === 'dark') {
+    root.classList.add(saved);
+  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    root.classList.add('dark');
+  } else {
+    root.classList.add('light');
+  }
+  window._toggleTheme = function() {
+    var isDark = root.classList.contains('dark');
+    root.classList.remove('light', 'dark');
+    root.classList.add(isDark ? 'light' : 'dark');
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  };
+})();
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/">KodePost</a>
+    <div class="nav-area">
+      <nav class="nav-desktop">
+        <a class="nav-link{{if .IsHome}} active{{end}}" href="/">Artigos</a>
+        <a class="nav-link{{if .IsPage}} active{{end}}" href="/sobre/">Sobre</a>
+        <a class="nav-link{{if .IsTags}} active{{end}}" href="/tags/">Tags</a>
+      </nav>
+      <button class="theme-toggle" onclick="window._toggleTheme()" aria-label="Alternar tema">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+{{if .IsHome}}
+
+  <section class="hero">
+    <p class="hero-byline">por Bruno Kodjaoglanian</p>
+    <h1>Tech Insights.</h1>
+    <p>Pensamentos sobre arquitetura de software, evolução de carreira em tecnologia e o cenário em constante mudança. Explorando conceitos técnicos profundos com foco em aplicação prática e engenharia sustentável.</p>
+  </section>
+
+  <div class="content-grid">
+    <section>
+      <div class="section-title">Artigos Recentes</div>
+      {{range .Groups}}
+      {{$year := .Year}}
+      {{range .Months}}
+      <div class="timeline-month">
+        <div class="month-label">{{.MonthName}} {{$year}}</div>
+        {{range .Posts}}
+        <article class="card">
+          <a href="/{{.Slug}}/">
+            <h3 class="card-title">{{.Title}}</h3>
+            {{if .Summary}}<p class="card-excerpt">{{.Summary}}</p>{{end}}
+            <div class="card-meta">
+              <span>{{.Date.Format "02 Jan"}}</span>
+              {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+            </div>
+          </a>
+        </article>
+        {{end}}
+      </div>
+      {{end}}
+      {{end}}
+    </section>
+
+    <aside class="sidebar">
+      {{if .Posts}}
+      <div class="sidebar-box">
+        <div class="sidebar-label">Destaques</div>
+        {{range .Posts}}
+        <div class="sidebar-item">
+          <a href="/{{.Slug}}/">
+            <h4>{{.Title}}</h4>
+            {{if .Summary}}<small>{{.Summary}}</small>{{end}}
+          </a>
+        </div>
+        {{end}}
+      </div>
+      {{end}}
+
+      {{if .AllTags}}
+      <div class="sidebar-box">
+        <div class="sidebar-label">Tópicos</div>
+        <div class="tags-cloud">
+          {{range .AllTags}}
+          <a href="/tags/#{{.}}" class="tag-chip">{{.}}</a>
+          {{end}}
+        </div>
+      </div>
+      {{end}}
+    </aside>
+  </div>
+
+{{else if .IsPage}}
+
+  <article>
+    <header class="page-header">
+      <h1>{{.Page.Title}}</h1>
+    </header>
+    <div class="post-body">{{.Page.Content}}</div>
+  </article>
+
+{{else if .IsTags}}
+
+  <div class="content-grid">
+    <section>
+      <div class="section-title">Tags</div>
+      <div class="tags-list">
+        {{range .Tags}}
+        <div class="tag-section" id="{{.Name}}">
+          <h2>{{.Name}}</h2>
+          <div class="tag-posts">
+            {{range .Posts}}
+            <a href="/{{.Slug}}/">
+              <div class="tag-post-title">{{.Title}}</div>
+              <div class="tag-post-date">{{.Date.Format "02 Jan 2006"}}</div>
+            </a>
+            {{end}}
+          </div>
+        </div>
+        {{end}}
+      </div>
+    </section>
+
+    <aside class="sidebar">
+      <div class="sidebar-box">
+        <div class="sidebar-label">Todas as Tags</div>
+        <div class="tags-cloud">
+          {{range .AllTags}}
+          <a href="#{{.}}" class="tag-chip">{{.}}</a>
+          {{end}}
+        </div>
+      </div>
+    </aside>
+  </div>
+
+{{else}}
+
+  <div class="content-grid">
+    <article>
+      <header class="post-header">
+        <h1>{{.Post.Title}}</h1>
+        <div class="post-meta">
+          <span>{{.Post.Date.Format "02 de January de 2006"}}</span>
+        </div>
+        {{if .Post.Tags}}
+        <div class="post-tags">
+          {{range .Post.Tags}}<span class="tag">{{.}}</span>{{end}}
+        </div>
+        {{end}}
+      </header>
+      <div class="post-body">{{.Post.Content}}</div>
+    </article>
+
+    <aside class="sidebar">
+      <div class="sidebar-box">
+        <div class="sidebar-label">Índice de Artigos</div>
+        {{range .Posts}}
+        <a class="sidebar-nav-item{{if eq .Slug $.Post.Slug}} active{{end}}" href="/{{.Slug}}/">{{.Title}}</a>
+        {{end}}
+      </div>
+
+      {{if .AllTags}}
+      <div class="sidebar-box">
+        <div class="sidebar-label">Tópicos</div>
+        <div class="tags-cloud">
+          {{range .AllTags}}
+          <a href="/tags/#{{.}}" class="tag-chip">{{.}}</a>
+          {{end}}
+        </div>
+      </div>
+      {{end}}
+    </aside>
+  </div>
+
+{{end}}
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 Bruno Kodjaoglanian</span>
+    <nav class="footer-links">
+      <a href="#">RSS</a>
+      <a href="#">Twitter</a>
+      <a href="#">GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Binário compilado
+kodepost
+
+# Site gerado (rebuild a cada deploy)
+public/
+
+# Dependências Go (go.sum é commitado, vendor não)
+vendor/
+
+# Ambiente
+.env
+.env.*
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+stich.md
+AGENTS.md
