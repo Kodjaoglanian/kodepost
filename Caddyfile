@@ -1,3 +1,4 @@
 kodepost.kodjao.xyz {
+    tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
     reverse_proxy kodepost:8765
 }
