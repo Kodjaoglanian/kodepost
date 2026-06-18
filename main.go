@@ -598,8 +598,8 @@ func generateRSS(posts []Post, outPath string) error {
 
 func generateSitemap(posts []Post, pages []Page, outPath string) error {
 	urls := []string{
-		fmt.Sprintf("<url><loc>https://kodepost.com/</loc><priority>1.0</priority></url>"),
-		fmt.Sprintf("<url><loc>https://kodepost.com/tags/</loc><priority>0.5</priority></url>"),
+		"<url><loc>https://kodepost.com/</loc><priority>1.0</priority></url>",
+		"<url><loc>https://kodepost.com/tags/</loc><priority>0.5</priority></url>",
 	}
 	for _, p := range posts {
 		urls = append(urls, fmt.Sprintf("<url><loc>https://kodepost.com/%s/</loc><lastmod>%s</lastmod><priority>0.8</priority></url>", p.Slug, p.Date.Format("2006-01-02")))

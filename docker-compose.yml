@@ -3,20 +3,16 @@ services:
   kodepost:
     build: .
     container_name: kodepost
-    ports:
-      - "8765:8765"
+    expose:
+      - "8765"
+    networks:
+      - kodepost-net
     restart: unless-stopped
-    read_only: true           # filesystem read-only (segurança)
+    read_only: true
     security_opt:
       - no-new-privileges:true
     tmpfs:
       - /tmp:noexec,nosuid,size=50m
-    # Para atualizar conteúdo sem rebuild da imagem, descomente o volume abaixo
-    # e monte seus posts/ e templates/ no host:
-    # volumes:
-    #   - ./posts:/app/posts:ro
-    #   - ./templates:/app/templates:ro
-    #   - ./assets:/app/assets:ro
     healthcheck:
       test: ["CMD", "/kodepost"]
       interval: 30s
@@ -24,9 +20,23 @@ services:
       retries: 3
       start_period: 5s
 
+  # ─── Caddy (proxy reverso + SSL automático) ─────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    networks:
+      - kodepost-net
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
   # ─── Desenvolvimento (opcional) ──────────────────────────────────────────────
-  # Modo dev com auto-rebuild ao alterar posts/templates:
-  # docker compose up --build kodepost-dev
   kodepost-dev:
     build: .
     container_name: kodepost-dev
@@ -39,3 +49,11 @@ services:
     command: ["serve", "-port", "8765"]
     profiles:
       - dev
+
+networks:
+  kodepost-net:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,3 @@
+kodepost.kodjao.xyz {
+    reverse_proxy kodepost:8765
+}
