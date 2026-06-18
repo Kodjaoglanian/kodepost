@@ -3,8 +3,25 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>{{if .IsHome}}KodePost{{else}}{{.Title}}{{end}}</title>
+<title>{{if .IsHome}}KodePost{{else}}{{.Title}} — KodePost{{end}}</title>
+<meta name="description" content="{{.Description}}"/>
+<meta name="author" content="Bruno Kodjaoglanian"/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="{{.Canonical}}"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%235154a2'/%3E%3Ctext x='16' y='23' font-family='Georgia%2Cserif' font-size='19' font-weight='700' text-anchor='middle' fill='white'%3EK%3C/text%3E%3C/svg%3E"/>
+<!-- Open Graph -->
+<meta property="og:site_name" content="KodePost"/>
+<meta property="og:title" content="{{if .IsHome}}KodePost{{else}}{{.Title}}{{end}}"/>
+<meta property="og:description" content="{{.Description}}"/>
+<meta property="og:url" content="{{.Canonical}}"/>
+<meta property="og:type" content="{{if .Post}}article{{else}}website{{end}}"/>
+<meta property="og:locale" content="pt_BR"/>
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="{{if .IsHome}}KodePost{{else}}{{.Title}}{{end}}"/>
+<meta name="twitter:description" content="{{.Description}}"/>
+<meta name="twitter:site" content="@Tuluxkc"/>
+{{if .Post}}<meta name="twitter:creator" content="@Tuluxkc"/>{{end}}
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -505,6 +522,47 @@ main {
   };
 })();
 </script>
+<!-- JSON-LD Structured Data -->
+{{if .Post}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{.Post.Title}}",
+  "description": "{{.Description}}",
+  "url": "{{.Canonical}}",
+  "datePublished": "{{.Post.Date.Format "2006-01-02"}}",
+  "author": {
+    "@type": "Person",
+    "name": "Bruno Kodjaoglanian",
+    "url": "https://github.com/Kodjaoglanian"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "KodePost",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://kodepost.com/favicon.svg"
+    }
+  }
+}
+</script>
+{{else}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "KodePost",
+  "description": "{{.Description}}",
+  "url": "{{.Canonical}}",
+  "author": {
+    "@type": "Person",
+    "name": "Bruno Kodjaoglanian",
+    "url": "https://github.com/Kodjaoglanian"
+  }
+}
+</script>
+{{end}}
 </head>
 <body>
 

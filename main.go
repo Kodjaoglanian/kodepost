@@ -44,16 +44,18 @@ type TagInfo struct {
 
 // PageData é injetado no template layout.html.
 type PageData struct {
-	IsHome  bool
-	IsPage  bool
-	IsTags  bool
-	Title   string
-	Posts   []Post
-	Post    *Post
-	Page    *Page
-	Groups  []YearGroup
-	Tags    []TagInfo
-	AllTags []string // para a sidebar/nuvem
+	IsHome      bool
+	IsPage      bool
+	IsTags      bool
+	Title       string
+	Description string
+	Canonical   string
+	Posts       []Post
+	Post        *Post
+	Page        *Page
+	Groups      []YearGroup
+	Tags        []TagInfo
+	AllTags     []string // para a sidebar/nuvem
 }
 
 // YearGroup agrupa posts por ano/mês.
@@ -159,6 +161,11 @@ func run() error {
 	// Gerar feed RSS
 	if err := generateRSS(posts, "public/rss.xml"); err != nil {
 		return fmt.Errorf("falha ao gerar rss: %w", err)
+	}
+
+	// Gerar sitemap
+	if err := generateSitemap(posts, pages, "public/sitemap.xml"); err != nil {
+		return fmt.Errorf("falha ao gerar sitemap: %w", err)
 	}
 
 	return nil
@@ -342,11 +349,13 @@ func generateIndex(posts []Post, allTags []string, tmplPath, outPath string) err
 
 	groups := buildTimelineGroups(posts)
 	data := PageData{
-		IsHome:  true,
-		Title:   "KodePost",
-		Posts:   featured, // destaques
-		Groups:  groups,
-		AllTags: allTags,
+		IsHome:      true,
+		Title:       "KodePost",
+		Description: "Pensamentos sobre arquitetura de software, evolução de carreira e tecnologia.",
+		Canonical:   "https://kodepost.com/",
+		Posts:       featured, // destaques
+		Groups:      groups,
+		AllTags:     allTags,
 	}
 
 	f, err := os.Create(outPath)
@@ -367,12 +376,18 @@ func generatePosts(posts []Post, allTags []string, tmplPath, outDir string) erro
 		if err := os.MkdirAll(postDir, 0755); err != nil {
 			return err
 		}
+		desc := posts[i].Summary
+		if desc == "" {
+			desc = "Artigo de Bruno Kodjaoglanian sobre tecnologia, arquitetura de software e carreira."
+		}
 		data := PageData{
-			IsHome:  false,
-			Title:   posts[i].Title,
-			Posts:   posts,
-			Post:    &posts[i],
-			AllTags: allTags,
+			IsHome:      false,
+			Title:       posts[i].Title,
+			Description: desc,
+			Canonical:   "https://kodepost.com/" + posts[i].Slug + "/",
+			Posts:       posts,
+			Post:        &posts[i],
+			AllTags:     allTags,
 		}
 		outPath := filepath.Join(postDir, "index.html")
 		f, err := os.Create(outPath)
@@ -399,11 +414,13 @@ func generatePages(pages []Page, posts []Post, allTags []string, tmplPath, outDi
 			return err
 		}
 		data := PageData{
-			IsPage:  true,
-			Title:   pages[i].Title,
-			Page:    &pages[i],
-			Posts:   posts,
-			AllTags: allTags,
+			IsPage:      true,
+			Title:       pages[i].Title,
+			Description: pages[i].Title + " — KodePost.",
+			Canonical:   "https://kodepost.com/" + pages[i].Slug + "/",
+			Page:        &pages[i],
+			Posts:       posts,
+			AllTags:     allTags,
 		}
 		outPath := filepath.Join(pageDir, "index.html")
 		f, err := os.Create(outPath)
@@ -442,11 +459,13 @@ func generateTagsPage(posts []Post, allTags []string, tmplPath, outPath string) 
 	}
 
 	data := PageData{
-		IsTags:  true,
-		Title:   "Tags — KodePost",
-		Tags:    tagInfos,
-		AllTags: allTags,
-		Posts:   posts,
+		IsTags:      true,
+		Title:       "Tags — KodePost",
+		Description: "Navegue por todos os artigos do KodePost agrupados por tag.",
+		Canonical:   "https://kodepost.com/tags/",
+		Tags:        tagInfos,
+		AllTags:     allTags,
+		Posts:       posts,
 	}
 
 	if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
@@ -575,6 +594,25 @@ func generateRSS(posts []Post, outPath string) error {
 </rss>`
 
 	return os.WriteFile(outPath, []byte(rss), 0644)
+}
+
+func generateSitemap(posts []Post, pages []Page, outPath string) error {
+	urls := []string{
+		fmt.Sprintf("<url><loc>https://kodepost.com/</loc><priority>1.0</priority></url>"),
+		fmt.Sprintf("<url><loc>https://kodepost.com/tags/</loc><priority>0.5</priority></url>"),
+	}
+	for _, p := range posts {
+		urls = append(urls, fmt.Sprintf("<url><loc>https://kodepost.com/%s/</loc><lastmod>%s</lastmod><priority>0.8</priority></url>", p.Slug, p.Date.Format("2006-01-02")))
+	}
+	for _, p := range pages {
+		urls = append(urls, fmt.Sprintf("<url><loc>https://kodepost.com/%s/</loc><priority>0.6</priority></url>", p.Slug))
+	}
+
+	sitemap := `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+` + strings.Join(urls, "\n") + `
+</urlset>`
+	return os.WriteFile(outPath, []byte(sitemap), 0644)
 }
 
 func escapeXML(s string) string {
